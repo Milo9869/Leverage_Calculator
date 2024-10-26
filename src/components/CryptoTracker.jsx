@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
-import { Input } from "./ui/input";
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
+import { Input } from "../components/ui/input";
 
-const CryptoTracker = () => {
+const CryptoTracker = ({ onSelectCrypto }) => {
   const [cryptoData, setCryptoData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,20 +13,25 @@ const CryptoTracker = () => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          'https://api.coingecko.com/api/v3/coins/markets?vs_currency=eur&order=market_cap_desc&per_page=50&page=1&sparkline=false'
+          'https://api.coingecko.com/api/v3/coins/markets?vs_currency=eur&order=market_cap_desc&per_page=50&page=1&sparkline=false&price_change_percentage=24h,7d'
         );
+        
+        if (!response.ok) {
+          throw new Error('Erreur réseau lors de la récupération des données');
+        }
+        
         const data = await response.json();
         setCryptoData(data);
         setFilteredData(data);
         setLoading(false);
       } catch (err) {
-        setError("Erreur lors de la récupération des données");
+        setError("Erreur lors de la récupération des données: " + err.message);
         setLoading(false);
       }
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 30000);
+    const interval = setInterval(fetchData, 30000); // Mise à jour toutes les 30 secondes
 
     return () => clearInterval(interval);
   }, []);
@@ -40,6 +45,8 @@ const CryptoTracker = () => {
   }, [searchTerm, cryptoData]);
 
   const formatNumber = (number, minimumFractionDigits = 2) => {
+    if (number === null || number === undefined) return 'N/A';
+    
     if (number >= 1e9) {
       return `${(number / 1e9).toFixed(2)}Md €`;
     } else if (number >= 1e6) {
@@ -54,10 +61,17 @@ const CryptoTracker = () => {
     }).format(number);
   };
 
+  const formatPercentage = (value) => {
+    if (value === null || value === undefined) return 'N/A';
+    return `${value.toFixed(2)}%`;
+  };
+
   if (loading) return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardContent className="p-6">
-        <p className="text-center">Chargement des données...</p>
+        <div className="flex justify-center items-center h-40">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        </div>
       </CardContent>
     </Card>
   );
@@ -100,23 +114,41 @@ const CryptoTracker = () => {
             </thead>
             <tbody>
               {filteredData.map((crypto, index) => (
-                <tr key={crypto.id} className="border-b hover:bg-gray-50 cursor-pointer" onClick={() => onSelectCrypto(crypto)}>
+                <tr 
+                  key={crypto.id} 
+                  className="border-b hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                  onClick={() => onSelectCrypto(crypto)}
+                >
                   <td className="p-4">{index + 1}</td>
-                  <td className="p-4 flex items-center gap-2">
-                    <img src={crypto.image} alt={crypto.name} className="w-6 h-6" />
-                    <div className="flex flex-col">
-                      <span className="font-medium">{crypto.name}</span>
-                      <span className="text-gray-500 text-sm">{crypto.symbol.toUpperCase()}</span>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <img 
+                        src={crypto.image} 
+                        alt={crypto.name} 
+                        className="w-6 h-6"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'fallback-image-url.png'; // URL d'une image par défaut
+                        }}
+                      />
+                      <div className="flex flex-col">
+                        <span className="font-medium">{crypto.name}</span>
+                        <span className="text-gray-500 text-sm">{crypto.symbol.toUpperCase()}</span>
+                      </div>
                     </div>
                   </td>
                   <td className="p-4 text-right font-medium">
                     {formatNumber(crypto.current_price)}
                   </td>
-                  <td className={`p-4 text-right ${crypto.price_change_percentage_24h > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {crypto.price_change_percentage_24h?.toFixed(2)}%
+                  <td className={`p-4 text-right font-medium ${
+                    crypto.price_change_percentage_24h > 0 ? 'text-green-500' : 'text-red-500'
+                  }`}>
+                    {formatPercentage(crypto.price_change_percentage_24h)}
                   </td>
-                  <td className={`p-4 text-right ${crypto.price_change_percentage_7d_in_currency > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {crypto.price_change_percentage_7d_in_currency?.toFixed(2)}%
+                  <td className={`p-4 text-right font-medium ${
+                    crypto.price_change_percentage_7d_in_currency > 0 ? 'text-green-500' : 'text-red-500'
+                  }`}>
+                    {formatPercentage(crypto.price_change_percentage_7d_in_currency)}
                   </td>
                   <td className="p-4 text-right text-gray-600">
                     {formatNumber(crypto.total_volume)}
@@ -130,7 +162,7 @@ const CryptoTracker = () => {
           </table>
         </div>
         <div className="mt-4 text-center text-sm text-gray-500">
-          Données mises à jour toutes les 30 secondes
+          Données mises à jour toutes les 30 secondes • {filteredData.length} cryptomonnaies affichées
         </div>
       </CardContent>
     </Card>
