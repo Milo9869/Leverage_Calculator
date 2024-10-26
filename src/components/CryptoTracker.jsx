@@ -100,7 +100,7 @@ const CryptoTracker = () => {
             </thead>
             <tbody>
               {filteredData.map((crypto, index) => (
-                <tr key={crypto.id} className="border-b hover:bg-gray-50">
+                <tr key={crypto.id} className="border-b hover:bg-gray-50 cursor-pointer" onClick={() => onSelectCrypto(crypto)}>
                   <td className="p-4">{index + 1}</td>
                   <td className="p-4 flex items-center gap-2">
                     <img src={crypto.image} alt={crypto.name} className="w-6 h-6" />
