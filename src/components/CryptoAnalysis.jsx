@@ -1,22 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
+import React, { useEffect, useState } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from "../components/ui/card";
 
 const CryptoAnalysis = ({ cryptoId, symbol, name, onBack }) => {
-  const container = useRef(null);
   const [loading, setLoading] = useState(true);
   const [priceData, setPriceData] = useState(null);
 
   useEffect(() => {
-    // Création du widget TradingView
-    const script = document.createElement('script');
-    script.src = 'https://s3.tradingview.com/tv.js';
-    script.async = true;
-    script.onload = () => {
-      if (typeof TradingView !== 'undefined') {
-        new TradingView.widget({
-          width: '100%',
-          height: 500,
-          symbol: `${symbol.toUpperCase()}EUR`,
+    // Fonction pour créer le widget
+    const createWidget = () => {
+      if (window.TradingView && document.getElementById('tradingview_chart')) {
+        new window.TradingView.widget({
+          autosize: true,
+          symbol: `BINANCE:${symbol.toUpperCase()}EUR`,
           interval: 'D',
           timezone: 'Europe/Paris',
           theme: 'light',
@@ -24,25 +19,45 @@ const CryptoAnalysis = ({ cryptoId, symbol, name, onBack }) => {
           locale: 'fr',
           toolbar_bg: '#f1f3f6',
           enable_publishing: false,
-          hide_side_toolbar: false,
           allow_symbol_change: true,
           container_id: 'tradingview_chart',
+          height: 500,
+          save_image: false,
           studies: [
             'MASimple@tv-basicstudies',
             'RSI@tv-basicstudies',
             'MACD@tv-basicstudies'
-          ]
+          ],
+          show_popup_button: true,
+          popup_width: '1000',
+          popup_height: '650'
         });
+        setLoading(false);
       }
-      setLoading(false);
     };
-    document.body.appendChild(script);
+
+    // Charger le script TradingView
+    if (!window.TradingView) {
+      const script = document.createElement('script');
+      script.src = 'https://s3.tradingview.com/tv.js';
+      script.async = true;
+      script.onload = () => {
+        createWidget();
+      };
+      document.head.appendChild(script);
+    } else {
+      createWidget();
+    }
 
     // Récupération des données supplémentaires
     fetchCryptoData();
 
+    // Nettoyage
     return () => {
-      document.body.removeChild(script);
+      const oldScript = document.querySelector('script[src="https://s3.tradingview.com/tv.js"]');
+      if (oldScript && oldScript.parentNode) {
+        oldScript.parentNode.removeChild(oldScript);
+      }
     };
   }, [symbol]);
 
@@ -78,13 +93,20 @@ const CryptoAnalysis = ({ cryptoId, symbol, name, onBack }) => {
           <CardTitle>Analyse Technique</CardTitle>
         </CardHeader>
         <CardContent>
-          {loading ? (
-            <div className="h-[500px] flex items-center justify-center">
-              <p>Chargement du graphique...</p>
-            </div>
-          ) : (
-            <div id="tradingview_chart" />
-          )}
+          <div className="relative" style={{ height: '500px' }}>
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white">
+                <div className="flex flex-col items-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mb-2"></div>
+                  <p>Chargement du graphique...</p>
+                </div>
+              </div>
+            )}
+            <div 
+              id="tradingview_chart" 
+              className="w-full h-full"
+            />
+          </div>
         </CardContent>
       </Card>
 
