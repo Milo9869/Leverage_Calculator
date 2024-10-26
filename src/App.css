@@ -40,3 +40,12 @@
 .read-the-docs {
   color: #888;
 }
+
+.option-selected {
+  background-color: #e0e7ff; /* Couleur bleu clair */
+  border: 1px solid #6366f1; /* Bordure bleu foncé */
+  color: #4f46e5; /* Texte bleu */
+  border-radius: 5px;
+  padding: 0.25rem 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
