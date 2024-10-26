@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import CryptoTracker from './components/CryptoTracker';
 import CryptoAnalysis from './components/CryptoAnalysis';
-import LeverageCalculator from './LeverageCalculator';
+import LeverageCalculator from './components/LeverageCalculator';
 
 function App() {
   // Ceci est nécessaire pour gérer la sélection
