@@ -24,8 +24,16 @@ function App() {
             onBack={() => setSelectedCrypto(null)}
           />
         ) : (
-          // Ici, on passe la prop onSelectCrypto
-          <CryptoTracker onSelectCrypto={handleCryptoSelect} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Afficher le composant CryptoTracker */}
+            <div>
+              <CryptoTracker onSelectCrypto={handleCryptoSelect} />
+            </div>
+            {/* Afficher le composant LeverageCalculator */}
+            <div>
+              <LeverageCalculator />
+            </div>
+          </div>
         )}
       </div>
     </div>
