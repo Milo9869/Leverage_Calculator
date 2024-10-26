@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
+import { Tooltip as ReactTooltip } from 'react-tooltip'; // Importer ReactTooltip
 import CryptoTracker from './components/CryptoTracker';
 import CryptoAnalysis from './components/CryptoAnalysis';
 import LeverageCalculator from './components/LeverageCalculator';
 import TabNavigation from './components/TabNavigation';
 
 function App() {
-  // Ceci est nécessaire pour gérer la sélection
   const [selectedCrypto, setSelectedCrypto] = useState(null);
   const [activeTab, setActiveTab] = useState('calculator');
 
@@ -38,6 +38,9 @@ function App() {
             )}
           </div>
         )}
+
+        {/* Ajoute ReactTooltip ici pour le rendre disponible globalement */}
+        <ReactTooltip place="top" type="dark" effect="solid" />
       </div>
     </div>
   );
