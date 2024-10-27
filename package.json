@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:rust": "cd rust-indicators && wasm-pack build --target web",
+    "build:all": "npm run build:rust && npm run build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -17,11 +19,14 @@
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-switch": "^1.1.1",
     "clsx": "^2.1.1",
+    "lightweight-charts": "^4.2.1",
     "lucide-react": "^0.453.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-tooltip": "^5.28.0",
-    "tailwind-merge": "^2.5.4"
+    "tailwind-merge": "^2.5.4",
+    "vite-plugin-top-level-await": "^1.0.0",
+    "vite-plugin-wasm": "^3.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
